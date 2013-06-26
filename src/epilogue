@@ -1,0 +1,34 @@
+#!/usr/bin/env python
+import os, sys
+try:
+    from prologue import main
+    from config import Config
+except ImportError:
+    sys.exit(0)  # Pretend we were never executed
+
+try:
+    # Errors that occur while creating and initializing the Config
+    # object are logged to a bootstrap logger which appends messages to
+    # /tmp/prologue-boot.log.  The only log messages should be errors
+    # during configuration, due to a bad ini file for example.
+    ini = os.environ.get('ROGUE_CONFIG', '/etc/prologue.ini')
+    bootstrap = os.environ.get('ROGUE_BOOTLOG', '/tmp/prologue-boot.log')
+    config = Config(ini=ini, logfile=bootstrap)
+
+    # Create a "syslog" logger now that we're configured
+    if config.sysloghost is None:
+        config.sysloghost = 'torqueserver'
+    config.logname = 'epilogue'
+    logger = config.syslogger()
+
+    try:
+        # Now everything is logged to syslog
+        logger.debug('epilogue starting')
+        status = main(logger, config, xjobids=[sys.argv[1]])
+        if status != 0:
+            logger.warning('main return status %d' % status)
+        logger.debug('epilogue finished')
+    except Exception, e:
+        logger.warning('caught exception: %s' % e)
+finally:
+    sys.exit(0)

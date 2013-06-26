@@ -1,0 +1,39 @@
+Proposed requirements for prologue scripts:
+
+Should provide good support for both serial and parallel jobs.
+
+Should be designed to facilitate testing and include a test suite.
+
+Should provide information about the stray processes to aid in
+determining the cause of the process becoming a stray, including
+information from its process tree and its environment.
+
+Should support a flexible logging mechanism, including support for
+syslog and email notification, and allow different logging levels for
+different logging handlers.
+
+Should use a configuration file and allow different configuration based
+on node and cluster.
+
+Should allow hierarchial configuration to avoid unnecessary replication
+of configuration information.
+
+Should support the definition groups of clusters and nodes within
+clusters in order to simplify configuration.
+
+Configuration parameters should include:
+
+  - enabled         Flag: Whether to run or not
+  - kill            Flag: Whether to kill stray processes or not
+  - safeusers       List: Process owners to allow to run outside a job
+  - sysloghost      String: Hostname of syslog daemon
+  - syslogport      Integer: Port of syslog daemon
+  - syslogfacility  String: Syslog facility name to use
+  - email           List: Email addresses to notify
+
+The prologue script should be based on code that can be used in
+different contexts, including a cron job and an interactive command
+utility.
+
+Should support use by a non-root user so users can clean up after
+themselves.

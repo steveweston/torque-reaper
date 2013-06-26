@@ -1,0 +1,49 @@
+#!/usr/bin/env python
+import os, sys, logging, getopt, socket, traceback
+try:
+    from prologue import main
+    from config import Config
+except ImportError:
+    sys.stderr.write('error: unable to import the prologue module\n')
+    sys.exit(1)
+
+ini = os.environ.get('ROGUE_CONFIG', '/etc/prologue.ini')
+node = os.environ.get('ROGUE_NODE', socket.gethostname().split('.')[0])
+try:
+    config = Config(ini=ini, node=node)
+except ValueError, e:
+    sys.stderr.write('error processing config file: %s\n' % ini)
+    sys.exit(1)
+except Exception, e:
+    sys.stderr.write('error processing config file: %s\n' % ini)
+    traceback.print_exc()
+    sys.exit(1)
+
+# Force the "enabled" and "kill" parameters to default values.  The
+# "enabled" parameter only makes sense for prologue/epilogue scripts,
+# and I want to require the "-k" option in order to kill rogue processes
+# when using this script.
+config.enabled = True
+config.kill = False
+
+status = config.cmdline(sys.argv)
+if status != 0:
+    sys.exit(status)
+
+logfmt = '%(message)s'
+logname = 'reaper'
+logging.basicConfig(format=logfmt)
+logger = logging.getLogger(logname)
+logger.setLevel(config.loglevel)
+
+try:
+    status = main(logger, config)
+except ValueError, e:
+    sys.stderr.write('error: %s\n' % e)
+    sys.exit(2)
+except Exception, e:
+    sys.stderr.write('internal error: caught exception: %s\n' % e)
+    traceback.print_exc()
+    sys.exit(3)
+
+sys.exit(status)
