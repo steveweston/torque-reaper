@@ -10,10 +10,7 @@ LOGFACILITIES = [
 LOGLEVELS = [
     'CRITICAL', 'ERROR', 'WARNING', 'WARN', 'INFO', 'DEBUG'
 ]
-SAFEUSERS = [
-    'ag663', 'ch427', 'cw464', 'ra359',
-    'dvasil', 'vendortech'
-]
+SAFEUSERS = []
 
 def tobool(v):
     if isinstance(v, basestring):
